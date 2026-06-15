@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gaming Dashboard 2024</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #07070f;
+    --surface: #0f0f1a;
+    --surface2: #16162280;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(124,92,252,0.4);
+    --accent: #7c5cfc;
+    --accent2: #fc5c7d;
+    --accent3: #5cfcb4;
+    --accent4: #fcb45c;
+    --text: #eeeef8;
+    --muted: #6b6b8a;
+    --font: 'Space Grotesk', sans-serif;
+    --mono: 'Space Mono', monospace;
+    --glow: 0 0 40px rgba(124,92,252,0.15);
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 99px; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND GLOW ─────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 900px; height: 600px;
+    background: radial-gradient(ellipse at center,
+      rgba(124,92,252,0.12) 0%,
+      rgba(252,92,125,0.05) 40%,
+      transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── TOPBAR ──────────────────────────────────────────── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(7,7,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 100%;
+  }
+  .topbar-logo {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .topbar-badge {
+    display: flex; gap: 8px;
+  }
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    border: 1px solid;
+    letter-spacing: 0.05em;
+  }
+  .badge-real  { color: var(--accent); border-color: rgba(124,92,252,0.4); background: rgba(124,92,252,0.08); }
+  .badge-proj  { color: var(--accent2); border-color: rgba(252,92,125,0.4); background: rgba(252,92,125,0.08); }
+
+  /* ── HERO ────────────────────────────────────────────── */
+  .hero {
+    position: relative; z-index: 1;
+    padding: 5rem 2rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    background: rgba(124,92,252,0.08);
+    border: 1px solid rgba(124,92,252,0.2);
+    padding: 5px 14px;
+    border-radius: 99px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, #7c5cfc 0%, #fc5c7d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    margin-top: 1rem;
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 0;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .hero-stat {
+    flex: 1; min-width: 150px;
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 1.5rem 2rem;
+    border-right: 1px solid var(--border);
+    position: relative;
+    transition: background 0.2s;
+  }
+  .hero-stat:last-child { border-right: none; }
+  .hero-stat:hover { background: rgba(124,92,252,0.05); }
+  .hero-stat::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .hero-stat:hover::before { opacity: 1; }
+  .hero-stat .val {
+    font-family: var(--mono);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .hero-stat .val.is-proj { color: var(--accent2); }
+  .hero-stat .lbl {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── GRID ────────────────────────────────────────────── */
+  .dashboard {
+    position: relative; z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(124,92,252,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 0 30px rgba(124,92,252,0.08), 0 8px 32px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+  }
+  .card-title {
+    font-size: 10px;
+    font-family: var(--mono);
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    width: 3px; height: 12px;
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    flex-shrink: 0;
+  }
+
+  .col-8  { grid-column: span 8; }
+  .col-4  { grid-column: span 4; }
+  .col-6  { grid-column: span 6; }
+  .col-12 { grid-column: span 12; }
+
+  @media (max-width: 768px) {
+    .col-8, .col-4, .col-6, .col-12 { grid-column: span 12; }
+    .dashboard { padding: 1rem; gap: 12px; }
+    .hero { padding: 3rem 1rem 2rem; }
+    .hero-meta { flex-direction: column; }
+    .hero-stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .topbar { padding: 0.75rem 1rem; }
+  }
+
+  /* ── GENRE BARS ──────────────────────────────────────── */
+  .genre-list { display: flex; flex-direction: column; gap: 14px; }
+  .genre-row  { display: flex; align-items: center; gap: 12px; }
+  .genre-label {
+    font-size: 13px; min-width: 175px;
+    color: var(--text); font-weight: 500;
+  }
+  .genre-bar-wrap {
+    flex: 1; height: 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 99px; overflow: hidden;
+  }
+  .genre-bar {
+    height: 100%; border-radius: 99px;
+    transition: width 1.2s cubic-bezier(.22,1,.36,1);
+    position: relative;
+  }
+  .genre-bar::after {
+    content: '';
+    position: absolute; right: 0; top: -2px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: inherit;
+    filter: blur(4px);
+    opacity: 0.8;
+  }
+  .genre-pct {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--muted); min-width: 36px; text-align: right;
+  }
+
+  /* ── TOP GAMES ───────────────────────────────────────── */
+  .game-list { display: flex; flex-direction: column; gap: 8px; }
+  .game-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    transition: background 0.2s, border-color 0.2s;
+    cursor: default;
+  }
+  .game-row:hover {
+    background: rgba(124,92,252,0.08);
+    border-color: rgba(124,92,252,0.2);
+  }
+  .game-rank {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); min-width: 22px;
+  }
+  .game-bar {
+    width: 3px; height: 28px; border-radius: 99px;
+    flex-shrink: 0;
+  }
+  .game-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .game-players { font-family: var(--mono); font-size: 12px; color: var(--accent3); }
+  .game-tag {
+    font-size: 10px; padding: 3px 8px; border-radius: 99px;
+    font-weight: 600; letter-spacing: 0.04em;
+  }
+
+  /* ── PLATFORM DONUT ──────────────────────────────────── */
+  .chart-wrap {
+    position: relative; width: 170px; height: 170px; margin: 0 auto;
+  }
+  .chart-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .chart-center-val {
+    font-family: var(--mono); font-size: 1.3rem; font-weight: 700;
+  }
+  .chart-center-lbl {
+    font-size: 10px; color: var(--muted); letter-spacing: 0.05em;
+  }
+  .platform-legend { display: flex; flex-direction: column; gap: 10px; margin-top: 1.25rem; }
+  .legend-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .legend-pct { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: auto; }
+
+  /* ── SEGMENTS CARDS ──────────────────────────────────── */
+  .revenue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .rev-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    transition: border-color 0.2s;
+  }
+  .rev-card:hover { border-color: rgba(124,92,252,0.25); }
+  .rev-val { font-family: var(--mono); font-size: 1.15rem; font-weight: 700; }
+  .rev-val.up   { color: var(--accent3); }
+  .rev-val.down { color: var(--accent2); }
+  .rev-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .trend {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; padding: 2px 8px; border-radius: 99px;
+    font-family: var(--mono); margin-top: 8px; font-weight: 700;
+  }
+  .trend.up   { background: rgba(92,252,180,0.1);  color: var(--accent3); border: 1px solid rgba(92,252,180,0.2); }
+  .trend.down { background: rgba(252,92,125,0.1);  color: var(--accent2); border: 1px solid rgba(252,92,125,0.2); }
+
+  /* ── ESPORT TABLE ────────────────────────────────────── */
+  .esport-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .esport-table th {
+    text-align: left; font-size: 10px; font-family: var(--mono);
+    letter-spacing: 0.08em; color: var(--muted);
+    padding: 0 8px 12px 8px; text-transform: uppercase;
+  }
+  .esport-table th:first-child { padding-left: 0; }
+  .esport-table td {
+    padding: 10px 8px; border-top: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  .esport-table td:first-child { padding-left: 0; }
+  .esport-table tr:hover td { background: rgba(124,92,252,0.04); }
+  .prize   { font-family: var(--mono); color: var(--accent3); font-weight: 700; }
+  .viewers { font-family: var(--mono); color: var(--muted); }
+  .esport-rank {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 6px;
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    background: rgba(124,92,252,0.12); color: var(--accent);
+    margin-right: 8px;
+  }
+
+  /* ── FOOTER ──────────────────────────────────────────── */
+  .footer {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto;
+    padding: 1.5rem 2rem;
+    font-size: 11px; color: var(--muted);
+    border-top: 1px solid var(--border);
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    justify-content: space-between; align-items: center;
+    font-family: var(--mono);
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  canvas { display: block; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <span class="topbar-logo">⬡ Gaming Dashboard</span>
+  <div class="topbar-badge">
+    <span class="badge badge-real">● Données réelles 2024</span>
+    <span class="badge badge-proj">◌ Projections 2025–2026</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <p class="hero-eyebrow">Industrie du jeu vidéo · Analyse mondiale</p>
+  <h1>Le gaming en chiffres<br><span class="grad">ce que les données révèlent</span></h1>
+  <p class="hero-sub">Données réelles 2024 issues de Newzoo, Statista et Steam Charts — avec projections de marché jusqu'en 2026.</p>
+  <div class="hero-meta">
+    <div class="hero-stat">
+      <span class="val" data-target="187" data-prefix="$" data-suffix="Md">$0Md</span>
+      <span class="lbl">Revenus réels 2024</span>
+    </div>
+    <div class="hero-stat">
+      <span class="val" data-target="3.3" data-suffix="Md joueurs">0Md joueurs</span>
+      <span class="lbl">Dans le monde</span>
+    </div>
+    <div class="hero-stat">
+      <span class="val" data-target="8" data-prefix="+" data-suffix="%">+0%</span>
+      <span class="lbl">Croissance annuelle</span>
+    </div>
+    <div class="hero-stat">
+      <span class="val is-proj" data-target="215" data-prefix="$" data-suffix="Md">$0Md</span>
+      <span class="lbl">Projection 2026</span>
+    </div>
+  </div>
+</header>
+
+<!-- DASHBOARD -->
+<main class="dashboard">
+
+  <!-- GENRES -->
+  <div class="card col-8">
+    <p class="card-title">Genres les plus joués — part de marché</p>
+    <div class="genre-list" id="genres"></div>
+  </div>
+
+  <!-- PLATEFORMES -->
+  <div class="card col-4">
+    <p class="card-title">Répartition par plateforme</p>
+    <div class="chart-wrap">
+      <canvas id="platformChart"></canvas>
+      <div class="chart-center">
+        <span class="chart-center-val" style="color:var(--accent)">3.3Md</span>
+        <span class="chart-center-lbl">joueurs</span>
+      </div>
+    </div>
+    <div class="platform-legend" id="platLegend"></div>
+  </div>
+
+  <!-- REVENUS -->
+  <div class="card col-8">
+    <p class="card-title">Revenus mondiaux 2019–2024 (réel) · 2025–2026 (projection)</p>
+    <canvas id="revenueChart" height="95"></canvas>
+  </div>
+
+  <!-- SEGMENTS -->
+  <div class="card col-4">
+    <p class="card-title">Segments de marché 2024</p>
+    <div class="revenue-grid">
+      <div class="rev-card">
+        <div class="rev-val up">$92Md</div>
+        <div class="rev-lbl">Mobile</div>
+        <div class="trend up">▲ +11%</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-val down">$53Md</div>
+        <div class="rev-lbl">Console</div>
+        <div class="trend down">▼ −2%</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-val up">$42Md</div>
+        <div class="rev-lbl">PC</div>
+        <div class="trend up">▲ +6%</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-val up">$3.8Md</div>
+        <div class="rev-lbl">Esport</div>
+        <div class="trend up">▲ +9%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP JEUX STEAM -->
+  <div class="card col-6">
+    <p class="card-title">Top jeux Steam — pic de joueurs simultanés 2024</p>
+    <div class="game-list" id="gameList"></div>
+  </div>
+
+  <!-- ESPORT -->
+  <div class="card col-6">
+    <p class="card-title">Tournois esport — prize pools 2024</p>
+    <table class="esport-table">
+      <thead>
+        <tr>
+          <th>Tournoi</th>
+          <th>Jeu</th>
+          <th>Prize pool</th>
+          <th>Viewers</th>
+        </tr>
+      </thead>
+      <tbody id="esportTable"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <span>Sources : Newzoo 2024 · Steam Charts · Statista · Esports Charts · Projections 2025–2026 : estimations marché</span>
+  <span>Fait avec ❤️ par Kenza HALIL</span>
+</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+
+const genres = [
+  { name: "Battle Royale / Shooter", pct: 28, color: "#7c5cfc" },
+  { name: "MOBA / Stratégie",        pct: 22, color: "#fc5c7d" },
+  { name: "RPG / Open World",        pct: 18, color: "#5cfcb4" },
+  { name: "Sport & Racing",          pct: 13, color: "#fcb45c" },
+  { name: "Simulation / Sandbox",    pct: 11, color: "#5cc8fc" },
+  { name: "Horreur / Aventure",      pct:  8, color: "#c45cfc" },
+];
+
+const platforms = [
+  { name: "Mobile",  pct: 49, color: "#7c5cfc" },
+  { name: "Console", pct: 28, color: "#fc5c7d" },
+  { name: "PC",      pct: 22, color: "#5cfcb4" },
+  { name: "Cloud",   pct:  1, color: "#fcb45c" },
+];
+
+const revenues = {
+  labels:     ["2019","2020","2021","2022","2023","2024","2025","2026"],
+  real:       [148,   162,   180,   184,   183,   187,   null,  null ],
+  projection: [null,  null,  null,  null,  null,  187,   200,   215  ],
+};
+
+const tagColors = {
+  "Sandbox":      { bg: "rgba(92,252,180,0.12)",  color: "#5cfcb4", bar: "#5cfcb4" },
+  "Shooter":      { bg: "rgba(124,92,252,0.12)",  color: "#7c5cfc", bar: "#7c5cfc" },
+  "RPG":          { bg: "rgba(252,180,92,0.12)",  color: "#fcb45c", bar: "#fcb45c" },
+  "Battle Royale":{ bg: "rgba(252,92,125,0.12)",  color: "#fc5c7d", bar: "#fc5c7d" },
+  "MOBA":         { bg: "rgba(92,200,252,0.12)",  color: "#5cc8fc", bar: "#5cc8fc" },
+  "Open World":   { bg: "rgba(196,92,252,0.12)",  color: "#c45cfc", bar: "#c45cfc" },
+};
+
+const topGames = [
+  { rank: "01", name: "Palworld",         players: "2.1M", tag: "Sandbox"       },
+  { rank: "02", name: "Counter-Strike 2", players: "1.8M", tag: "Shooter"       },
+  { rank: "03", name: "Elden Ring",       players: "953K", tag: "RPG"           },
+  { rank: "04", name: "Hogwarts Legacy",  players: "879K", tag: "RPG"           },
+  { rank: "05", name: "PUBG",             players: "680K", tag: "Battle Royale" },
+  { rank: "06", name: "Dota 2",           players: "510K", tag: "MOBA"          },
+];
+
+const esport = [
+  { name: "The International 2024", game: "Dota 2",           prize: "$15M",   viewers: "1.2M" },
+  { name: "LoL Worlds 2024",        game: "League of Legends", prize: "$2.5M",  viewers: "6.4M" },
+  { name: "CS2 Major Copenhagen",   game: "CS2",               prize: "$1.25M", viewers: "1.8M" },
+  { name: "Fortnite FNCS",          game: "Fortnite",          prize: "$4M",    viewers: "620K" },
+  { name: "EVO 2024",               game: "Street Fighter 6",  prize: "$0.3M",  viewers: "430K" },
+];
+
+// ── COUNTER ANIMATION ─────────────────────────────────────────────────────────
+
+function animateCounter(el) {
+  const target  = parseFloat(el.dataset.target);
+  const prefix  = el.dataset.prefix  || "";
+  const suffix  = el.dataset.suffix  || "";
+  const isFloat = String(target).includes(".");
+  const dur     = 1600;
+  const start   = performance.now();
+
+  function step(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = target * eased;
+    el.textContent = prefix + (isFloat ? val.toFixed(1) : Math.round(val)) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { animateCounter(e.target); observer.unobserve(e.target); } });
+}, { threshold: 0.5 });
+
+document.querySelectorAll(".val[data-target]").forEach(el => observer.observe(el));
+
+// ── GENRES ────────────────────────────────────────────────────────────────────
+
+const genreContainer = document.getElementById("genres");
+genres.forEach(g => {
+  genreContainer.innerHTML += `
+    <div class="genre-row">
+      <span class="genre-label">${g.name}</span>
+      <div class="genre-bar-wrap">
+        <div class="genre-bar" style="width:0%;background:${g.color}" data-w="${g.pct}"></div>
+      </div>
+      <span class="genre-pct">${g.pct}%</span>
+    </div>`;
+});
+setTimeout(() => {
+  document.querySelectorAll(".genre-bar").forEach(b => b.style.width = b.dataset.w + "%");
+}, 150);
+
+// ── PLATFORM LEGEND ───────────────────────────────────────────────────────────
+
+const platLegend = document.getElementById("platLegend");
+platforms.forEach(p => {
+  platLegend.innerHTML += `
+    <div class="legend-row">
+      <div class="legend-dot" style="background:${p.color};box-shadow:0 0 6px ${p.color}"></div>
+      <span>${p.name}</span>
+      <span class="legend-pct">${p.pct}%</span>
+    </div>`;
+});
+
+// ── PLATFORM DOUGHNUT ─────────────────────────────────────────────────────────
+
+new Chart(document.getElementById("platformChart").getContext("2d"), {
+  type: "doughnut",
+  data: {
+    labels: platforms.map(p => p.name),
+    datasets: [{
+      data: platforms.map(p => p.pct),
+      backgroundColor: platforms.map(p => p.color),
+      borderWidth: 0,
+      hoverOffset: 8,
+    }]
+  },
+  options: {
+    cutout: "70%",
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label} : ${ctx.parsed}%` } }
+    },
+    animation: { animateRotate: true, duration: 1200 }
+  }
+});
+
+// ── REVENUE CHART ─────────────────────────────────────────────────────────────
+
+const rCtx = document.getElementById("revenueChart").getContext("2d");
+const gradReal = rCtx.createLinearGradient(0, 0, 0, 220);
+gradReal.addColorStop(0, "rgba(124,92,252,0.28)");
+gradReal.addColorStop(1, "rgba(124,92,252,0)");
+
+new Chart(rCtx, {
+  type: "line",
+  data: {
+    labels: revenues.labels,
+    datasets: [
+      {
+        label: "Réel",
+        data: revenues.real,
+        borderColor: "#7c5cfc",
+        backgroundColor: gradReal,
+        fill: true, tension: 0.4, spanGaps: false,
+        pointBackgroundColor: "#7c5cfc",
+        pointRadius: 5, pointHoverRadius: 8,
+        borderWidth: 2.5,
+      },
+      {
+        label: "Projection",
+        data: revenues.projection,
+        borderColor: "#fc5c7d",
+        backgroundColor: "transparent",
+        borderDash: [7, 4],
+        fill: false, tension: 0.4, spanGaps: false,
+        pointBackgroundColor: "#fc5c7d",
+        pointRadius: 5, pointHoverRadius: 8,
+        borderWidth: 2.5,
+      }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: {
+        display: true,
+        labels: { color: "#6b6b8a", font: { family: "'Space Mono'", size: 10 }, boxWidth: 20, usePointStyle: true, pointStyleWidth: 16 }
+      },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label} : $${ctx.parsed.y}Md` } }
+    },
+    scales: {
+      x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#6b6b8a", font: { family: "'Space Mono'", size: 10 } } },
+      y: {
+        grid: { color: "rgba(255,255,255,0.03)" },
+        ticks: { color: "#6b6b8a", font: { family: "'Space Mono'", size: 10 }, callback: v => `$${v}Md` },
+        min: 130
+      }
+    },
+    animation: { duration: 1400 }
+  }
+});
+
+// ── TOP GAMES ─────────────────────────────────────────────────────────────────
+
+const gameList = document.getElementById("gameList");
+topGames.forEach(g => {
+  const t = tagColors[g.tag] || tagColors["Shooter"];
+  gameList.innerHTML += `
+    <div class="game-row">
+      <span class="game-rank">${g.rank}</span>
+      <div class="game-bar" style="background:${t.bar};box-shadow:0 0 8px ${t.bar}60"></div>
+      <span class="game-name">${g.name}</span>
+      <span class="game-tag" style="background:${t.bg};color:${t.color};border:1px solid ${t.color}40">${g.tag}</span>
+      <span class="game-players">${g.players}</span>
+    </div>`;
+});
+
+// ── ESPORT TABLE ──────────────────────────────────────────────────────────────
+
+const esportBody = document.getElementById("esportTable");
+esport.forEach((e, i) => {
+  esportBody.innerHTML += `
+    <tr>
+      <td><span class="esport-rank">${String(i+1).padStart(2,"0")}</span>${e.name}</td>
+      <td style="color:var(--muted)">${e.game}</td>
+      <td class="prize">${e.prize}</td>
+      <td class="viewers">${e.viewers}</td>
+    </tr>`;
+});
+</script>
+</body>
+</html>
